@@ -284,7 +284,7 @@
             }, 800);
         }
         
-        // 检查答案
+        // 检查答案 - 修改为显示所有题目的正确答案，无论是否填写
         function checkAnswers() {
             let correctCount = 0;
             
@@ -293,15 +293,16 @@
             
             // 检查每个答案
             inputElements.forEach((input, index) => {
-                // 确保输入有效
-                if (!input.value.trim()) {
-                    input.classList.add('border-red-500', 'bg-red-50');
-                    return;
+                // 移除之前可能显示的正确答案
+                const existingAnswer = input.nextElementSibling;
+                if (existingAnswer && existingAnswer.classList.contains('correct-answer')) {
+                    existingAnswer.remove();
                 }
                 
-                const userAnswer = parseInt(input.value, 10);
+                // 获取用户答案，未填写则视为错误
+                const userAnswer = input.value.trim() ? parseInt(input.value, 10) : null;
                 const question = questions[index];
-                const isCorrect = !isNaN(userAnswer) && userAnswer === question.answer;
+                const isCorrect = userAnswer !== null && !isNaN(userAnswer) && userAnswer === question.answer;
                 
                 // 更新问题数据
                 question.userAnswer = userAnswer;
@@ -315,6 +316,13 @@
                 const resultIndicator = input.parentElement.nextElementSibling;
                 resultIndicator.classList.remove('hidden');
                 
+                // 显示正确答案 - 无论是否答对或填写
+                const correctAnswerEl = document.createElement('span');
+                correctAnswerEl.className = 'correct-answer text-sm text-secondary ml-2 font-bold';
+                correctAnswerEl.textContent = `正确答案: ${question.answer}`;
+                input.parentNode.insertBefore(correctAnswerEl, input.nextSibling);
+                
+                // 设置输入框样式
                 if (isCorrect) {
                     resultIndicator.innerHTML = '<i class="fa fa-check text-secondary text-xl"></i>';
                     input.classList.add('border-secondary', 'bg-green-50', 'pulse-correct');
@@ -323,16 +331,6 @@
                     resultIndicator.innerHTML = '<i class="fa fa-times text-red-500 text-xl"></i>';
                     input.classList.add('border-red-500', 'bg-red-50');
                     input.classList.remove('border-secondary', 'bg-green-50');
-                    
-                    // 显示正确答案
-                    setTimeout(() => {
-                        if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('correct-answer')) {
-                            const correctAnswerEl = document.createElement('span');
-                            correctAnswerEl.className = 'correct-answer text-sm text-secondary ml-2 font-bold';
-                            correctAnswerEl.textContent = `正确答案: ${question.answer}`;
-                            input.parentNode.insertBefore(correctAnswerEl, input.nextSibling);
-                        }
-                    }, 300);
                 }
             });
             
