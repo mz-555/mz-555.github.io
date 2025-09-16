@@ -413,20 +413,6 @@
                     checkAnswers();
                 }
             });
-            
-            // 输入框自动跳到下一个，提高练习效率
-            document.addEventListener('input', (e) => {
-                if (e.target.classList.contains('answer-input') && e.target.value) {
-                    const inputs = document.querySelectorAll('.answer-input');
-                    const currentIndex = Array.from(inputs).indexOf(e.target);
-                    if (currentIndex < inputs.length - 1) {
-                        // 延迟一小段时间再跳转，让用户看到输入的内容
-                        setTimeout(() => {
-                            inputs[currentIndex + 1].focus();
-                        }, 200);
-                    }
-                }
-            });
         });
     </script>
 </body>
