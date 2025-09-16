@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儿童数学练习 - 加减法</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- 配置Tailwind自定义颜色和字体，适合儿童的明亮色彩 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4A90E2',
+                        secondary: '#5CB85C',
+                        accent: '#FFC107',
+                        light: '#F8F9FA',
+                        dark: '#333333'
+                    },
+                    fontFamily: {
+                        rounded: ['Comic Sans MS', 'Marker Felt', 'Arial Rounded MT Bold', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            }
+            .btn-bounce {
+                @apply transform transition duration-300 hover:scale-105 active:scale-95;
+            }
+            .input-focus {
+                @apply focus:ring-2 focus:ring-primary/50 focus:border-primary focus:outline-none;
+            }
+            .pulse-correct {
+                animation: pulse 0.5s ease-in-out;
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen font-rounded text-dark">
+    <div class="container mx-auto px-4 py-6 max-w-4xl">
+        <!-- 页面标题 - 童趣设计 -->
+        <header class="text-center mb-6 mt-4">
+            <div class="inline-block bg-accent/30 rounded-full p-4 mb-3">
+                <i class="fa fa-calculator text-4xl text-primary"></i>
+            </div>
+            <h1 class="text-[clamp(1.8rem,5vw,2.5rem)] font-bold text-primary mb-2 tracking-tight">
+                数学小能手练习
+            </h1>
+            <p class="text-gray-600 text-lg">
+                挑战你的计算能力，成为数学小能手！
+            </p>
+        </header>
+        
+        <!-- 难度选择 -->
+        <div class="bg-white rounded-xl p-5 mb-6 card-shadow">
+            <p class="text-center font-medium mb-3 text-lg">选择难度：</p>
+            <div class="flex justify-center gap-4 flex-wrap">
+                <button id="easyMode" class="difficulty-btn bg-primary text-white px-6 py-3 rounded-lg btn-bounce text-lg font-bold active">
+                    <i class="fa fa-star mr-2"></i>20以内
+                </button>
+                <button id="hardMode" class="difficulty-btn bg-gray-200 text-gray-700 px-6 py-3 rounded-lg btn-bounce text-lg font-bold">
+                    <i class="fa fa-star mr-2"></i><i class="fa fa-star mr-2"></i>100以内
+                </button>
+            </div>
+        </div>
+        
+        <!-- 控制面板 -->
+        <div class="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+            <button id="generateBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg shadow btn-bounce flex items-center justify-center text-lg">
+                <i class="fa fa-refresh mr-2"></i> 新题目
+            </button>
+            <button id="checkBtn" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-lg shadow btn-bounce flex items-center justify-center text-lg">
+                <i class="fa fa-check-circle mr-2"></i> 检查答案
+            </button>
+        </div>
+        
+        <!-- 结果显示区域 -->
+        <div id="resultArea" class="hidden mb-6 bg-white rounded-xl p-5 card-shadow transition-all duration-500 transform opacity-0">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-primary mb-1">练习结果</h2>
+                    <p class="text-gray-600" id="resultText">你答对了 0 题，共 20 题</p>
+                </div>
+                <div class="mt-3 md:mt-0 flex items-center">
+                    <div id="emojiResult" class="text-4xl mr-3">😊</div>
+                    <div>
+                        <span class="text-3xl font-bold text-primary" id="scoreDisplay">0</span>
+                        <span class="text-gray-600 text-xl">分</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div id="progressBar" class="h-full bg-secondary rounded-full transition-all duration-1000" style="width: 0%"></div>
+            </div>
+            <div class="mt-4 text-center text-gray-600" id="encouragementText">
+                继续努力，你会越来越棒！
+            </div>
+        </div>
+        
+        <!-- 题目卡片 - 更大的字体适合儿童 -->
+        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
+            <h2 class="text-xl font-bold text-primary mb-4 flex items-center">
+                <i class="fa fa-list-ol mr-2"></i> 计算题 (共20题)
+            </h2>
+            
+            <!-- 题目列表 -->
+            <div id="questionsContainer" class="space-y-4">
+                <!-- 题目将通过JavaScript动态生成 -->
+            </div>
+        </div>
+        
+        <!-- 鼓励语 -->
+        <div class="text-center text-gray-600 italic mb-8 text-lg">
+            <p>加油！做完所有题目可以获得评分哦！</p>
+        </div>
+        
+        <!-- 页脚 -->
+        <footer class="text-center text-gray-500 text-sm py-4">
+            <p>儿童数学练习 | 让学习变得更有趣</p>
+        </footer>
+    </div>
+
+    <script>
+        // 存储题目和答案的数据结构
+        let questions = [];
+        // 当前难度模式：easy(20以内)，hard(100以内)
+        let currentMode = 'easy';
+        
+        // DOM元素
+        const questionsContainer = document.getElementById('questionsContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const checkBtn = document.getElementById('checkBtn');
+        const resultArea = document.getElementById('resultArea');
+        const resultText = document.getElementById('resultText');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const emojiResult = document.getElementById('emojiResult');
+        const encouragementText = document.getElementById('encouragementText');
+        const easyModeBtn = document.getElementById('easyMode');
+        const hardModeBtn = document.getElementById('hardMode');
+        
+        // 生成随机数 - 根据难度调整范围
+        function getRandomNumber() {
+            if (currentMode === 'easy') {
+                // 20以内
+                return Math.floor(Math.random() * 20) + 1;
+            } else {
+                // 100以内
+                return Math.floor(Math.random() * 100) + 1;
+            }
+        }
+        
+        // 生成运算符 - 只生成加法和减法
+        function getRandomOperator() {
+            const operators = ['+', '-'];
+            return operators[Math.floor(Math.random() * operators.length)];
+        }
+        
+        // 计算正确答案 - 确保减法结果不为负数
+        function calculateAnswer(num1, num2, operator) {
+            if (operator === '+') {
+                return num1 + num2;
+            } else { // '-'
+                // 确保结果不为负数
+                if (num1 >= num2) {
+                    return num1 - num2;
+                } else {
+                    // 交换两个数，使结果为正数
+                    return num2 - num1;
+                }
+            }
+        }
+        
+        // 生成20道题目
+        function generateQuestions() {
+            questions = [];
+            questionsContainer.innerHTML = '';
+            
+            // 添加加载动画 - 有趣的加载效果
+            questionsContainer.innerHTML = `
+                <div class="flex justify-center items-center py-10">
+                    <div class="flex flex-col items-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-3"></div>
+                        <p class="text-gray-500 text-lg">正在准备有趣的题目...</p>
+                    </div>
+                </div>
+            `;
+            
+            // 延迟生成题目，显示加载效果
+            setTimeout(() => {
+                questionsContainer.innerHTML = '';
+                
+                for (let i = 0; i < 20; i++) {
+                    let num1, num2, operator;
+                    
+                    operator = getRandomOperator();
+                    num1 = getRandomNumber();
+                    num2 = getRandomNumber();
+                    
+                    // 对于减法，确保第一个数大于等于第二个数
+                    if (operator === '-') {
+                        if (num1 < num2) {
+                            // 交换两个数
+                            [num1, num2] = [num2, num1];
+                        }
+                    }
+                    
+                    // 对于加法，确保结果不超过难度上限
+                    const maxSum = currentMode === 'easy' ? 20 : 100;
+                    if (operator === '+') {
+                        // 确保和不超过难度上限
+                        while (num1 + num2 > maxSum) {
+                            num1 = getRandomNumber();
+                            num2 = getRandomNumber();
+                        }
+                    }
+                    
+                    const answer = calculateAnswer(num1, num2, operator);
+                    
+                    questions.push({
+                        id: i,
+                        num1,
+                        num2,
+                        operator,
+                        answer,
+                        userAnswer: null,
+                        isCorrect: null
+                    });
+                    
+                    // 创建题目元素 - 更大的输入框适合儿童
+                    const questionElement = document.createElement('div');
+                    questionElement.className = 'question-item flex flex-col sm:flex-row items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-primary/30 transition-colors';
+                    questionElement.dataset.id = i;
+                    
+                    questionElement.innerHTML = `
+                        <div class="flex items-center justify-center w-8 h-8 bg-primary/10 text-primary rounded-full font-bold">
+                            ${i + 1}
+                        </div>
+                        <div class="flex-1 flex items-center text-xl md:text-2xl">
+                            <span class="mr-2">${num1}</span>
+                            <span class="mx-2 operator font-bold">${operator}</span>
+                            <span class="mx-2">${num2}</span>
+                            <span class="mx-2">=</span>
+                            <input type="number" 
+                                   class="answer-input w-24 h-12 border border-gray-300 rounded-lg text-center text-xl input-focus"
+                                   placeholder="?"
+                                   min="0">
+                        </div>
+                        <div class="result-indicator hidden w-8 h-8 flex items-center justify-center"></div>
+                    `;
+                    
+                    questionsContainer.appendChild(questionElement);
+                }
+                
+                // 隐藏结果区域
+                resultArea.classList.add('hidden');
+                resultArea.classList.remove('opacity-100');
+                resultArea.classList.add('opacity-0');
+                
+                // 自动聚焦到第一个输入框
+                setTimeout(() => {
+                    const firstInput = document.querySelector('.answer-input');
+                    if (firstInput) firstInput.focus();
+                }, 100);
+            }, 800);
+        }
+        
+        // 检查答案
+        function checkAnswers() {
+            let correctCount = 0;
+            
+            // 获取所有输入框
+            const inputElements = document.querySelectorAll('.answer-input');
+            
+            // 检查每个答案
+            inputElements.forEach((input, index) => {
+                // 确保输入有效
+                if (!input.value.trim()) {
+                    input.classList.add('border-red-500', 'bg-red-50');
+                    return;
+                }
+                
+                const userAnswer = parseInt(input.value, 10);
+                const question = questions[index];
+                const isCorrect = !isNaN(userAnswer) && userAnswer === question.answer;
+                
+                // 更新问题数据
+                question.userAnswer = userAnswer;
+                question.isCorrect = isCorrect;
+                
+                if (isCorrect) {
+                    correctCount++;
+                }
+                
+                // 显示结果指示器
+                const resultIndicator = input.parentElement.nextElementSibling;
+                resultIndicator.classList.remove('hidden');
+                
+                if (isCorrect) {
+                    resultIndicator.innerHTML = '<i class="fa fa-check text-secondary text-xl"></i>';
+                    input.classList.add('border-secondary', 'bg-green-50', 'pulse-correct');
+                    input.classList.remove('border-red-500', 'bg-red-50');
+                } else {
+                    resultIndicator.innerHTML = '<i class="fa fa-times text-red-500 text-xl"></i>';
+                    input.classList.add('border-red-500', 'bg-red-50');
+                    input.classList.remove('border-secondary', 'bg-green-50');
+                    
+                    // 显示正确答案
+                    setTimeout(() => {
+                        if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('correct-answer')) {
+                            const correctAnswerEl = document.createElement('span');
+                            correctAnswerEl.className = 'correct-answer text-sm text-secondary ml-2 font-bold';
+                            correctAnswerEl.textContent = `正确答案: ${question.answer}`;
+                            input.parentNode.insertBefore(correctAnswerEl, input.nextSibling);
+                        }
+                    }, 300);
+                }
+            });
+            
+            // 计算得分
+            const score = Math.round((correctCount / questions.length) * 100);
+            
+            // 更新结果显示
+            updateResultDisplay(score, correctCount);
+            
+            // 显示结果区域并添加动画
+            resultArea.classList.remove('hidden');
+            setTimeout(() => {
+                resultArea.classList.remove('opacity-0');
+                resultArea.classList.add('opacity-100');
+            }, 10);
+            
+            // 滚动到结果区域
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // 更新结果显示
+        function updateResultDisplay(score, correctCount) {
+            // 根据得分显示不同表情和鼓励语
+            if (score === 100) {
+                emojiResult.textContent = '🎉';
+                encouragementText.textContent = '太棒了！你是数学小天才！';
+            } else if (score >= 80) {
+                emojiResult.textContent = '👍';
+                encouragementText.textContent = '真厉害！再努力一下就能得满分啦！';
+            } else if (score >= 60) {
+                emojiResult.textContent = '😊';
+                encouragementText.textContent = '做得不错！继续加油哦！';
+            } else {
+                emojiResult.textContent = '💪';
+                encouragementText.textContent = '别灰心，多练习一定会有进步的！';
+            }
+            
+            // 显示结果
+            resultText.textContent = `你答对了 ${correctCount} 题，共 ${questions.length} 题`;
+            scoreDisplay.textContent = score;
+            progressBar.style.width = `${score}%`;
+        }
+        
+        // 切换难度模式
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // 更新按钮样式
+            if (mode === 'easy') {
+                easyModeBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                easyModeBtn.classList.add('bg-primary', 'text-white');
+                hardModeBtn.classList.remove('bg-primary', 'text-white');
+                hardModeBtn.classList.add('bg-gray-200', 'text-gray-700');
+            } else {
+                hardModeBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                hardModeBtn.classList.add('bg-primary', 'text-white');
+                easyModeBtn.classList.remove('bg-primary', 'text-white');
+                easyModeBtn.classList.add('bg-gray-200', 'text-gray-700');
+            }
+            
+            // 生成新题目
+            generateQuestions();
+        }
+        
+        // 事件监听
+        generateBtn.addEventListener('click', generateQuestions);
+        checkBtn.addEventListener('click', checkAnswers);
+        easyModeBtn.addEventListener('click', () => switchMode('easy'));
+        hardModeBtn.addEventListener('click', () => switchMode('hard'));
+        
+        // 初始化页面时生成题目
+        document.addEventListener('DOMContentLoaded', () => {
+            generateQuestions();
+            
+            // 为输入框添加回车键提交功能
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    checkAnswers();
+                }
+            });
+            
+            // 输入框自动跳到下一个，提高练习效率
+            document.addEventListener('input', (e) => {
+                if (e.target.classList.contains('answer-input') && e.target.value) {
+                    const inputs = document.querySelectorAll('.answer-input');
+                    const currentIndex = Array.from(inputs).indexOf(e.target);
+                    if (currentIndex < inputs.length - 1) {
+                        // 延迟一小段时间再跳转，让用户看到输入的内容
+                        setTimeout(() => {
+                            inputs[currentIndex + 1].focus();
+                        }, 200);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
